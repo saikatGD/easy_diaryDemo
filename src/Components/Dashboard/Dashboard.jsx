@@ -64,7 +64,14 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, [user,navigate]);
+  }, [user, navigate]);
+
+  const convertToBengaliNumber = (num) => {
+    const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+    return num.toString().split("").map(digit => bengaliDigits[parseInt(digit)]).join("");
+  };
+
+
 
   // Log out handler
   const handleLogOut = () => {
@@ -90,7 +97,7 @@ const Dashboard = () => {
   };
 
 
-// Delete item handler
+  // Delete item handler
   // Handle search input change
   const handleSearch = (event) => {
     const query = event.target.value.toLowerCase();
@@ -129,57 +136,57 @@ const Dashboard = () => {
       console.error("Error deleting item:", err.message);
     }
   };
-if (loading) {
-  return <div>Loading...</div>;
-}
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-if (error) {
-  return <div>Error: {error}</div>;
-}
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
 
 
 
   // PDF download handler with custom Bengali font
- 
-const handleDownloadPDF = () => {
-  const doc = new jsPDF();
 
-  // Add the custom font (Noto Sans Bengali) to the jsPDF instance using base64 encoding
-  doc.addFileToVFS("NotoSansBengali-Regular.ttf", NotoSansBengaliBase64);
-  doc.addFont("NotoSansBengali-Regular.ttf", "NotoSansBengali", "normal");
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
 
-  // Set the font before rendering the table
-  doc.setFont("NotoSansBengali");
+    // Add the custom font (Noto Sans Bengali) to the jsPDF instance using base64 encoding
+    doc.addFileToVFS("NotoSansBengali-Regular.ttf", NotoSansBengaliBase64);
+    doc.addFont("NotoSansBengali-Regular.ttf", "NotoSansBengali", "normal");
 
-  // Prepare the table data
-  const tableData = data.map((item, index) => [
-    index + 1, 
-    item.bishoy_biboron,
-    item.upodeshtar_Depto,
-    item.seniorSecretaryDepto,
-    item.atik_SecretaryLaw,
-    item.copy,
-    item.bishoyShironam,
-    item.preronerTarikh,
-    item.bistariTo,
-  ]);
+    // Set the font before rendering the table
+    doc.setFont("NotoSansBengali");
 
-  // Add the table to the document with the appropriate header and body
-  doc.autoTable({
-    head: [
-      ['Serial', 'Subject / Description', 'Advisor Department', 'Senior Secretary Department', 'Additional Secretary (Law)', 'Copy', 'Subject Title', 'Date of Dispatch', 'Details']
-    ],
-    body: tableData,
-    // Set the font size for the table (optional)
-    theme: 'grid', 
-    headStyles: { fontSize: 10 }, // Set the font size for header
-    bodyStyles: { fontSize: 10 }, // Set the font size for body text
-  });
+    // Prepare the table data
+    const tableData = data.map((item, index) => [
+      index + 1,
+      item.bishoy_biboron,
+      item.upodeshtar_Depto,
+      item.seniorSecretaryDepto,
+      item.atik_SecretaryLaw,
+      item.copy,
+      item.bishoyShironam,
+      item.preronerTarikh,
+      item.bistariTo,
+    ]);
 
-  // Save the PDF
-  doc.save('compose_data.pdf');
-};
+    // Add the table to the document with the appropriate header and body
+    doc.autoTable({
+      head: [
+        ['Serial', 'Subject / Description', 'Advisor Department', 'Senior Secretary Department', 'Additional Secretary (Law)', 'Copy', 'Subject Title', 'Date of Dispatch', 'Details']
+      ],
+      body: tableData,
+      // Set the font size for the table (optional)
+      theme: 'grid',
+      headStyles: { fontSize: 10 }, // Set the font size for header
+      bodyStyles: { fontSize: 10 }, // Set the font size for body text
+    });
+
+    // Save the PDF
+    doc.save('compose_data.pdf');
+  };
   // Search handler
   // const handleSearch = (event) => {
   //   const query = event.target.value;
@@ -201,137 +208,137 @@ const handleDownloadPDF = () => {
       <div className="grow ml-16 md:ml-64 lg:h-screen bg-gray-200 text-gray-900">
         {/* User info display */}
         <div className="flex items-center justify-between gap-4 p-3 border-b">
-  {/* Left part for any other elements you might have, or just leave it empty */}
-  
-  <div className="flex-1 text-right">
-    <h2 className="font-semibold text-lg">{userData.name}</h2>
-    <p className="text-gray-500">{userData.email}</p>
-  </div>
-</div>
+          {/* Left part for any other elements you might have, or just leave it empty */}
+
+          <div className="flex-1 text-right">
+            <h2 className="font-semibold text-lg">{userData.name}</h2>
+            <p className="text-gray-500">{userData.email}</p>
+          </div>
+        </div>
 
         {/* Dashboard Overview (Cards) */}
         <div className="gap-4 mb-6 px-4">
 
 
-  <h2 className="text-3xl font-extrabold mb-4 text-left text-gray-800 drop-shadow-sm">
-  Easy Diary Dashboard
-</h2>
+          <h2 className="text-3xl font-extrabold mb-4 text-left text-gray-800 drop-shadow-sm">
+            Easy Diary Dashboard
+          </h2>
 
 
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
-    {/* Card 1 */}
-    <div className="bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 rounded-lg p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-4xl">{<IoIosSend />}</div>
-        <div className="text-right">
-          <p className="text-lg font-semibold">প্রেরিত</p>
-          <p className="text-2xl font-bold">40</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+            {/* Card 1 */}
+            <div className="bg-gradient-to-r from-blue-400 to-blue-600 text-white shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 rounded-lg p-6">
+              <div className="flex items-center justify-between">
+                <div className="text-4xl">{<IoIosSend />}</div>
+                <div className="text-right">
+                  <p className="text-lg font-semibold">প্রেরিত</p>
+                  <p className="text-2xl font-bold">40</p>
+                </div>
+              </div>
+            </div>
+            {/* Card 2 */}
+            <div className="bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 rounded-lg p-6">
+              <div className="flex items-center justify-between">
+                <div className="text-4xl">{<MdCallReceived />}</div>
+                <div className="text-right">
+                  <p className="text-lg font-semibold">গৃহীত</p>
+                  <p className="text-2xl font-bold">120</p>
+                </div>
+              </div>
+            </div>
+            {/* Card 3 */}
+            <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 rounded-lg p-6">
+              <div className="flex items-center justify-between">
+                <div className="text-4xl">{<MdOutlinePendingActions />}</div>
+                <div className="text-right">
+                  <p className="text-lg font-semibold">অমীমাংসিত</p>
+                  <p className="text-2xl font-bold">30</p>
+                </div>
+              </div>
+            </div>
+            {/* Card 4 */}
+            <div className="bg-gradient-to-r from-purple-400 to-purple-600 text-white shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 rounded-lg p-6">
+              <div className="flex items-center justify-between">
+                <div className="text-4xl">{<GrCompliance />}</div>
+                <div className="text-right">
+                  <p className="text-lg font-semibold">সম্পন্ন</p>
+                  <p className="text-2xl font-bold">11</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    {/* Card 2 */}
-    <div className="bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 rounded-lg p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-4xl">{<MdCallReceived />}</div>
-        <div className="text-right">
-          <p className="text-lg font-semibold">গৃহীত</p>
-          <p className="text-2xl font-bold">120</p>
-        </div>
-      </div>
-    </div>
-    {/* Card 3 */}
-    <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 rounded-lg p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-4xl">{<MdOutlinePendingActions />}</div>
-        <div className="text-right">
-          <p className="text-lg font-semibold">অমীমাংসিত</p>
-          <p className="text-2xl font-bold">30</p>
-        </div>
-      </div>
-    </div>
-    {/* Card 4 */}
-    <div className="bg-gradient-to-r from-purple-400 to-purple-600 text-white shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 rounded-lg p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-4xl">{<GrCompliance />}</div>
-        <div className="text-right">
-          <p className="text-lg font-semibold">সম্পন্ন</p>
-          <p className="text-2xl font-bold">11</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 
-  
-<div className="px-4 h-full flex flex-col">
-<h2 className="text-3xl font-extrabold mb-4 text-left text-gray-800 drop-shadow-sm">
-  Diary Records
-</h2>
 
-  {/* searchbar */}
-<div className="flex  px-0 mb-4 border-l w-full">
-  {/* Search Bar */}
-  <div className="flex items-center flex-grow">
-    <label className="input input-bordered flex items-center gap-4 w-full">
-      <input
-        type="text"
-        placeholder="Search your letters..."
-        onChange={handleSearch}
-        value={searchQuery}
+        <div className="px-4 h-full flex flex-col">
+          <h2 className="text-3xl font-extrabold mb-4 text-left text-gray-800 drop-shadow-sm">
+            Diary Records
+          </h2>
 
-        className="input input-bordered w-full"
-      />
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 16 16"
-        fill="currentColor"
-        className="h-4 w-4 opacity-70"
-      >
-        <path
-          fillRule="evenodd"
-          d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-          clipRule="evenodd"
-        />
-      </svg>
-    </label>
-  </div>
+          {/* searchbar */}
+          <div className="flex  px-0 mb-4 border-l w-full">
+            {/* Search Bar */}
+            <div className="flex items-center flex-grow">
+              <label className="input input-bordered flex items-center gap-4 w-full">
+                <input
+                  type="text"
+                  placeholder="Search your letters..."
+                  onChange={handleSearch}
+                  value={searchQuery}
 
-  {/* Download PDF Button */}
-  <button
-    onClick={handleDownloadPDF}
-    className="btn btn-primary ml-4"
-  >
-    Download PDF
-  </button>
-</div>
+                  className="input input-bordered w-full"
+                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  className="h-4 w-4 opacity-70"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </label>
+            </div>
+
+            {/* Download PDF Button */}
+            <button
+              onClick={handleDownloadPDF}
+              className="btn btn-primary ml-4"
+            >
+              Download PDF
+            </button>
+          </div>
 
 
-  {/* Table Wrapper */}
-  <div className="flex-grow  min-h-[60vh] overflow-y-auto shadow-md rounded-md bg-white">
-    <table className="table-auto w-full border-collapse">
-      <thead>
-        <tr>
-          <th className="px-4 py-2 border">ক্রমিক</th>
-          <th className="px-4 py-2 border">বিষয়/বিবরণ</th>
-          <th className="px-4 py-2 border">উপদেষ্টার দপ্তর</th>
-          <th className="px-4 py-2 border">সিনিয়র সচিবের দপ্তর</th>
-          <th className="px-4 py-2 border">অতিঃ সচিব (আইন)অনুবিভাগ</th>
-          <th className="px-4 py-2 border">যুগ্ন সচিব (আইন)অধিশাখা</th>
-          <th className="px-4 py-2 border">অতিঃ সচিব (শৃংখলা)অনুবিভাগ</th>
-          <th className="px-4 py-2 border">যুগ্ন সচিব (শৃংখলা)অধিশাখা</th>
-          <th className="px-4 py-2 border">আইন শাখাসমূহ</th>
-          <th className="px-4 py-2 border">শৃংখলা শাখাসমূহ</th>
-          <th className="px-4 py-2 border">সুপারিশ/মন্তব্য</th>
-          <th className="px-4 py-2 border">ডায়রি নং</th>
-          <th className="px-4 py-2 border">বিবিধ/অভ্যন্তরীণ দপ্তর</th>
-          <th className="px-4 py-2 border">বিবিধ/বহিস্থ দপ্তর</th>
-          <th className="px-4 py-2 border">সাক্ষর/সিল</th>
-          <th className="px-4 py-2 border">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {/* {data.map((item, index) => (
+          {/* Table Wrapper */}
+          <div className="flex-grow  min-h-[60vh] overflow-y-auto shadow-md rounded-md bg-white">
+            <table className="table-auto w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 border">ক্রমিক</th>
+                  <th className="px-4 py-2 border">বিষয়/বিবরণ</th>
+                  <th className="px-4 py-2 border">উপদেষ্টার দপ্তর</th>
+                  <th className="px-4 py-2 border">সিনিয়র সচিবের দপ্তর</th>
+                  <th className="px-4 py-2 border">অতিঃ সচিব (আইন)অনুবিভাগ</th>
+                  <th className="px-4 py-2 border">যুগ্ন সচিব (আইন)অধিশাখা</th>
+                  <th className="px-4 py-2 border">অতিঃ সচিব (শৃংখলা)অনুবিভাগ</th>
+                  <th className="px-4 py-2 border">যুগ্ন সচিব (শৃংখলা)অধিশাখা</th>
+                  <th className="px-4 py-2 border">আইন শাখাসমূহ</th>
+                  <th className="px-4 py-2 border">শৃংখলা শাখাসমূহ</th>
+                  <th className="px-4 py-2 border">সুপারিশ/মন্তব্য</th>
+                  <th className="px-4 py-2 border">ডায়রি নং</th>
+                  <th className="px-4 py-2 border">বিবিধ/অভ্যন্তরীণ দপ্তর</th>
+                  <th className="px-4 py-2 border">বিবিধ/বহিস্থ দপ্তর</th>
+                  <th className="px-4 py-2 border">সাক্ষর/সিল</th>
+                  <th className="px-4 py-2 border">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* {data.map((item, index) => (
           <tr key={item.id}>
           <td className="px-4 py-2 border">{index + 1}</td>
   <td className="px-4 py-2 border text-center">{item.bishoy_biboron || "-"}</td>
@@ -363,39 +370,52 @@ const handleDownloadPDF = () => {
         ))} */}
 
 
-{filteredData.map((item, index) => (
-              <tr key={item.id}>
-                <td className="px-4 py-2 border">{index + 1}</td>
-                <td className="px-4 py-2 border">{item.bishoy_biboron || "-"}</td>
-                <td className="px-4 py-2 border">{item.upodeshtar_depto || "-"}</td>
-                <td className="px-4 py-2 border">{item.senior_secretary_depto || "-"}</td>
-                <td className="px-4 py-2 border">{item.atik_secretary_law || "-"}</td>
-                <td className="px-4 py-2 border">{item.anu_vibhag || "-"}</td>
-                <td className="px-4 py-2 border">{item.atik_secretary_discipline || "-"}</td>
-                <td className="px-4 py-2 border">{item.anu_vibhag_discipline || "-"}</td>
-                <td className="px-4 py-2 border">{item.law_shakha || "-"}</td>
-                <td className="px-4 py-2 border">{item.discipline_shakha || "-"}</td>
-                <td className="px-4 py-2 border">{item.suparish_comment || "-"}</td>
-                <td className="px-4 py-2 border">{item.diary_no || "-"}</td>
-                <td className="px-4 py-2 border">{item.internal_depto || "-"}</td>
-                <td className="px-4 py-2 border">{item.external_depto || "-"}</td>
-                <td className="px-4 py-2 border">{item.signature_seal || "-"}</td>
-                <td className="px-4 py-2 border">
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-      </tbody>
-    </table>
-  </div>
+                {filteredData.map((item, index) => (
+                  <tr key={item.id}>
+                    <td className="px-4 py-2 border">{index + 1}</td>
+                    <td className="px-4 py-2 border">{item.bishoy_biboron || "-"}</td>
+                    <td className="px-4 py-2 border">{item.upodeshtar_depto || "-"}</td>
+                    <td className="px-4 py-2 border">{item.senior_secretary_depto || "-"}</td>
+                    <td className="px-4 py-2 border">{item.atik_secretary_law || "-"}</td>
+                    <td className="px-4 py-2 border">{item.anu_vibhag || "-"}</td>
+                    <td className="px-4 py-2 border">{item.atik_secretary_discipline || "-"}</td>
+                    <td className="px-4 py-2 border">{item.anu_vibhag_discipline || "-"}</td>
+
+                    {/* <td className="px-4 py-2 border">{item.law_shakha || "-"}</td> */}
+                    <td className="px-4 py-2 border">
+                      {item.law_shakha && item.law_shakha_number
+                        ? `${item.law_shakha} (${convertToBengaliNumber(item.law_shakha_number)})`
+                        : item.law_shakha || item.law_shakha_number || "-"
+                      }
+                    </td>
+
+                    <td className="px-4 py-2 border">
+                      {item.discipline_shakha && item.discipline_shakha_number
+                        ? `${item.discipline_shakha} (${convertToBengaliNumber(item.discipline_shakha_number)})`
+                        : item.discipline_shakha || item.discipline_shakha_number || "-"
+                      }
+                    </td>
+                    <td className="px-4 py-2 border">{item.suparish_comment || "-"}</td>
+                    <td className="px-4 py-2 border">{item.diary_no || "-"}</td>
+                    <td className="px-4 py-2 border">{item.internal_depto || "-"}</td>
+                    <td className="px-4 py-2 border">{item.external_depto || "-"}</td>
+                    <td className="px-4 py-2 border">{item.signature_seal || "-"}</td>
+                    <td className="px-4 py-2 border">
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
 
-</div>
+        </div>
 
 
       </div>
