@@ -10,7 +10,7 @@ import { GrCompliance } from "react-icons/gr";
 import { supabase } from "../../firebase/supabaseClient"; // Import Supabase client
 import { jsPDF } from "jspdf"; // Import jsPDF
 import "jspdf-autotable"; // Import for table support in jsPDF
-
+import Navbar from "../Navbar/Navbar";
 const placeholderImage = "/path/to/local-placeholder.jpg";
 
 // Your base64 encoded font string
@@ -204,17 +204,19 @@ const Dashboard = () => {
 
   return (
     <>
+      <div className="ml-16 md:ml-64"><Navbar></Navbar></div>
       <Sidebar />
+      
       <div className="grow ml-16 md:ml-64 lg:h-screen bg-gray-200 text-gray-900">
         {/* User info display */}
-        <div className="flex items-center justify-between gap-4 p-3 border-b">
-          {/* Left part for any other elements you might have, or just leave it empty */}
+        {/* <div className="flex items-center justify-between gap-4 p-3 border-b">
+          Left part for any other elements you might have, or just leave it empty
 
           <div className="flex-1 text-right">
             <h2 className="font-semibold text-lg">{userData.name}</h2>
             <p className="text-gray-500">{userData.email}</p>
           </div>
-        </div>
+        </div> */}
 
         {/* Dashboard Overview (Cards) */}
         <div className="gap-4 mb-6 px-4">
