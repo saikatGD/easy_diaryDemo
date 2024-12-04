@@ -114,6 +114,46 @@ const Dashboard = () => {
       setFilteredData(filtered);
     }
   };
+ const handleEdit = async (id, updatedItem) => {
+  try {
+    const { error } = await supabase
+      .from("compose")
+      .update(updatedItem)
+      .match({ id });
+
+    if (error) throw new Error(error.message);
+
+    // Update both data and filteredData states to reflect changes
+    const updatedData = data.map((item) =>
+      item.id === id ? { ...item, ...updatedItem } : item
+    );
+    setData(updatedData);
+
+    // Re-apply the current search query to the updated data
+    const updatedFilteredData = updatedData.filter((item) =>
+      Object.values(item).some((val) =>
+        String(val || "").toLowerCase().includes(searchQuery)
+      )
+    );
+    setFilteredData(updatedFilteredData);
+  } catch (err) {
+    console.error("Error editing item:", err.message);
+  }
+};
+
+// Add state to hold the edited value for each row
+const [editItem, setEditItem] = useState({});
+
+// Handle changes in input fields
+const handleInputChange = (e, field) => {
+  const { value } = e.target;
+  setEditItem((prev) => ({
+    ...prev,
+    [field]: value,
+  }));
+};
+
+  
 
   // Handle delete action
   const handleDelete = async (id) => {
@@ -317,7 +357,7 @@ const Dashboard = () => {
 
 
           {/* Table Wrapper */}
-     /* Table Wrapper */}
+  
           <div className="flex-grow min-h-[60vh] overflow-y-auto shadow-md rounded-md bg-white">
             <table className="table-auto w-full border-collapse">
               <thead>
@@ -338,6 +378,7 @@ const Dashboard = () => {
                   <th rowSpan="2" className="px-4 py-2 border">বিবিধ/অভ্যন্তরীণ দপ্তর</th>
                   <th rowSpan="2" className="px-4 py-2 border">বিবিধ/বহিস্থ দপ্তর</th>
                   <th rowSpan="2" className="px-4 py-2 border">সাক্ষর/সিল</th>
+                  <th rowSpan="2" className="px-4 py-2 border">ফাইল</th>
                   <th rowSpan="2" className="px-4 py-2 border">Action</th>
                 </tr>
                 {/* Sub-Columns */}
@@ -391,11 +432,21 @@ const Dashboard = () => {
                     <td className="px-4 py-2 border text-center">{item.internal_depto || "-"}</td>
                     <td className="px-4 py-2 border text-center">{item.external_depto || "-"}</td>
 
+                    {/* File upload */}
+                    <td className="px-4 py-2 border text-center">{item.signature_seal || "-"}</td>
+
                     {/* Signature/Seal */}
                     <td className="px-4 py-2 border text-center">{item.signature_seal || "-"}</td>
 
+                    
                     {/* Action */}
                     <td className="px-4 py-2 border text-center">
+                      <button
+                        onClick={() => handleEdit(item.id)}
+                        className="text-yellow-500 hover:text-yellow-700"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => handleDelete(item.id)}
                         className="text-red-500 hover:text-red-700"
