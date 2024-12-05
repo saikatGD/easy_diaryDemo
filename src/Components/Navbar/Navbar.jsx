@@ -42,8 +42,8 @@ const Navbar = () => {
   };
 
   return (
-    <div className="bg-gray-100 text-gray-900 border-b border-gray-300 p-4 flex items-center">
-      <div className="flex gap-[1400px] ml-16">
+    <div className=" text-gray-900 border-b border-gray-300 p-4 flex items-end">
+      <div className="flex items-end justify-end ">
         
         {/* User Profile */}
         <div className="flex-none gap-2">
@@ -64,7 +64,7 @@ const Navbar = () => {
                 <a className="justify-between">
                   {t('User')}: {userData.name}
                 </a>
-                <a className="text-gray-500">{userData.email}</a>
+                <a className="text-gray-900">{userData.email}</a>
               </li>
               <li><a>{t('Settings')}</a></li>
               <li><a onClick={handleLogout}>{t('Logout')}</a></li> {/* Log Out button */}
@@ -87,17 +87,6 @@ const Navbar = () => {
               </li>
             </ul>
           </div>
-        </div>
-
-        {/* Search Bar */}
-        <div className="ml-4">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={handleSearch}
-            placeholder={t('Search')}
-            className="input input-bordered w-full max-w-xs"
-          />
         </div>
       </div>
     </div>

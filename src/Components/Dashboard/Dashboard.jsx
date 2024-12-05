@@ -168,40 +168,32 @@ const Dashboard = () => {
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-
-    // Add the custom font (Noto Sans Bengali) to the jsPDF instance using base64 encoding
-    doc.addFileToVFS("NotoSansBengali-Regular.ttf", NotoSansBengaliBase64);
-    doc.addFont("NotoSansBengali-Regular.ttf", "NotoSansBengali", "normal");
-
-    // Set the font before rendering the table
-    doc.setFont("NotoSansBengali");
-
-    // Prepare the table data
+    
+    // Set a basic font for testing
+    doc.setFont("Helvetica");
+  
     const tableData = data.map((item, index) => [
       index + 1,
-      item.bishoy_biboron,
-      item.upodeshtar_Depto,
-      item.seniorSecretaryDepto,
-      item.atik_SecretaryLaw,
-      item.copy,
-      item.bishoyShironam,
-      item.preronerTarikh,
-      item.bistariTo,
+      item.bishoy_biboron || "-",
+      item.upodeshtar_Depto || "-",
+      item.seniorSecretaryDepto || "-",
+      item.atik_SecretaryLaw || "-",
+      item.copy || "-",
+      item.bishoyShironam || "-",
+      item.preronerTarikh || "-",
+      item.bistariTo || "-",
     ]);
-
-    // Add the table to the document with the appropriate header and body
+  
     doc.autoTable({
       head: [
         ['Serial', 'Subject / Description', 'Advisor Department', 'Senior Secretary Department', 'Additional Secretary (Law)', 'Copy', 'Subject Title', 'Date of Dispatch', 'Details']
       ],
       body: tableData,
-      // Set the font size for the table (optional)
       theme: 'grid',
-      headStyles: { fontSize: 10 }, // Set the font size for header
-      bodyStyles: { fontSize: 10 }, // Set the font size for body text
+      headStyles: { fontSize: 10 },
+      bodyStyles: { fontSize: 10 },
     });
-
-    // Save the PDF
+  
     doc.save('compose_data.pdf');
   };
   // Search handler
@@ -221,14 +213,12 @@ const Dashboard = () => {
 
   return (
     <>
-    <div className="ml-16 md:ml-64"><Navbar></Navbar></div>
+    <div className=" flex  justify-end"><Navbar></Navbar></div>
       <Sidebar />
       <div className="grow ml-16 md:ml-64 lg:h-screen bg-gray-200 text-gray-900">
         
-
         {/* Dashboard Overview (Cards) */}
         <div className="gap-4 mb-6 px-4">
-
 
           <h2 className="text-3xl font-extrabold mb-4 text-left text-gray-800 drop-shadow-sm">
             Easy Diary Dashboard
@@ -287,17 +277,17 @@ const Dashboard = () => {
           </h2>
 
           {/* searchbar */}
-          <div className="flex  px-0 mb-4 border-l w-full">
+          <div className="flex  px-0 mb-4  w-full">
             {/* Search Bar */}
             <div className="flex items-center flex-grow">
-              <label className="input input-bordered flex items-center gap-4 w-full">
+              <label className="input input-bordered flex items-center gap-4 w-[30%]">
                 <input
                   type="text"
                   placeholder="Search your letters..."
                   onChange={handleSearch}
                   value={searchQuery}
 
-                  className="input input-bordered w-full"
+                  className="input  w-full"
                 />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
