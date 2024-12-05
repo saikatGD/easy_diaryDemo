@@ -124,7 +124,6 @@ const ComposePage = () => {
             name="bishoyBiboron"
             value={formData.bishoyBiboron}
             onChange={handleChange}
-            required
 
             style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
@@ -191,16 +190,6 @@ const ComposePage = () => {
         </div>
 
 
-
-
-
-
-
-
-
-
-
-
         <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
           <div style={{ flex: 1 }}>
             <label>অতিঃ সচিব (শৃংখলা) অনুবিভাগ:</label>
@@ -209,6 +198,7 @@ const ComposePage = () => {
               name="atikSecretaryDiscipline"
               value={formData.atikSecretaryDiscipline}
               onChange={handleChange}
+              required
               style={{ width: '100%', padding: '8px', marginTop: '5px' }}
             />
           </div>
@@ -361,6 +351,7 @@ const ComposePage = () => {
             name="signatureSeal"
             value={formData.signatureSeal}
             onChange={handleChange}
+            required
             style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
         </div>

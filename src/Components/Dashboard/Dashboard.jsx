@@ -10,7 +10,7 @@ import { GrCompliance } from "react-icons/gr";
 import { supabase } from "../../firebase/supabaseClient"; // Import Supabase client
 import { jsPDF } from "jspdf"; // Import jsPDF
 import "jspdf-autotable"; // Import for table support in jsPDF
-import Navbar from "../Navbar/Navbar";
+
 const placeholderImage = "/path/to/local-placeholder.jpg";
 
 // Your base64 encoded font string
@@ -30,7 +30,24 @@ const Dashboard = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
+  const handleEdit = (item) => {
+    console.log("Navigating to compose with item:", item);
+    navigate("/compose", { state: { formData: item } });
+  };
+  const handleSave = async () => {
+    if (isEditing) {
+      await updateItem(currentItem.id, { name: newItem });
+      setIsEditing(false);
+      setCurrentItem(null);
+    } else {
+      await createItem({ name: newItem });
+    }
+    fetchItems();
+    setNewItem('');
+  };
+      
   // Fetch data from Supabase compose table
   useEffect(() => {
     if (user) {
@@ -114,46 +131,6 @@ const Dashboard = () => {
       setFilteredData(filtered);
     }
   };
- const handleEdit = async (id, updatedItem) => {
-  try {
-    const { error } = await supabase
-      .from("compose")
-      .update(updatedItem)
-      .match({ id });
-
-    if (error) throw new Error(error.message);
-
-    // Update both data and filteredData states to reflect changes
-    const updatedData = data.map((item) =>
-      item.id === id ? { ...item, ...updatedItem } : item
-    );
-    setData(updatedData);
-
-    // Re-apply the current search query to the updated data
-    const updatedFilteredData = updatedData.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val || "").toLowerCase().includes(searchQuery)
-      )
-    );
-    setFilteredData(updatedFilteredData);
-  } catch (err) {
-    console.error("Error editing item:", err.message);
-  }
-};
-
-// Add state to hold the edited value for each row
-const [editItem, setEditItem] = useState({});
-
-// Handle changes in input fields
-const handleInputChange = (e, field) => {
-  const { value } = e.target;
-  setEditItem((prev) => ({
-    ...prev,
-    [field]: value,
-  }));
-};
-
-  
 
   // Handle delete action
   const handleDelete = async (id) => {
@@ -244,19 +221,16 @@ const handleInputChange = (e, field) => {
 
   return (
     <>
-      <div className="ml-16 md:ml-64"><Navbar></Navbar></div>
       <Sidebar />
-      
       <div className="grow ml-16 md:ml-64 lg:h-screen bg-gray-200 text-gray-900">
         {/* User info display */}
-        {/* <div className="flex items-center justify-between gap-4 p-3 border-b">
-          Left part for any other elements you might have, or just leave it empty
-
+        <div className="flex items-center justify-between gap-4 p-3 border-b">
           <div className="flex-1 text-right">
             <h2 className="font-semibold text-lg">{userData.name}</h2>
             <p className="text-gray-500">{userData.email}</p>
+            <button onClick={handleLogOut} className="btn bg-green-700 text-white hover:text-green-700">Log out</button>
           </div>
-        </div> */}
+        </div>
 
         {/* Dashboard Overview (Cards) */}
         <div className="gap-4 mb-6 px-4">
@@ -312,7 +286,7 @@ const handleInputChange = (e, field) => {
         </div>
 
 
-
+        {/* record  */}
         <div className="px-4 h-full flex flex-col">
           <h2 className="text-3xl font-extrabold mb-4 text-left text-gray-800 drop-shadow-sm">
             Diary Records
@@ -349,7 +323,7 @@ const handleInputChange = (e, field) => {
             {/* Download PDF Button */}
             <button
               onClick={handleDownloadPDF}
-              className="btn btn-primary ml-4"
+              className="btn bg-green-700 text-white hover:text-green-700 ml-4"
             >
               Download PDF
             </button>
@@ -357,101 +331,72 @@ const handleInputChange = (e, field) => {
 
 
           {/* Table Wrapper */}
-  
-          <div className="flex-grow min-h-[60vh] overflow-y-auto shadow-md rounded-md bg-white">
+          <div className="flex-grow  min-h-[60vh] overflow-y-auto shadow-md rounded-md bg-white">
             <table className="table-auto w-full border-collapse">
               <thead>
-                {/* Main Header */}
                 <tr>
-                  <th rowSpan="2" className="px-4 py-2 border">ক্রমিক</th>
-                  <th rowSpan="2" className="px-4 py-2 border">বিষয়/বিবরণ</th>
-                  <th rowSpan="2" className="px-4 py-2 border">উপদেষ্টার দপ্তর</th>
-                  <th rowSpan="2" className="px-4 py-2 border">সিনিয়র সচিবের দপ্তর</th>
-                  <th rowSpan="2" className="px-4 py-2 border">অতিঃ সচিব (আইন)অনুবিভাগ</th>
-                  <th rowSpan="2" className="px-4 py-2 border">যুগ্ন সচিব (আইন)অধিশাখা</th>
-                  <th rowSpan="2" className="px-4 py-2 border">অতিঃ সচিব (শৃংখলা)অনুবিভাগ</th>
-                  <th rowSpan="2" className="px-4 py-2 border">যুগ্ন সচিব (শৃংখলা)অধিশাখা</th>
-                  <th colSpan="4" className="px-4 py-2 border">আইন শাখাসমূহ</th>
-                  <th colSpan="4" className="px-4 py-2 border">শৃংখলা শাখাসমূহ</th>
-                  <th rowSpan="2" className="px-4 py-2 border">সুপারিশ/মন্তব্য</th>
-                  <th rowSpan="2" className="px-4 py-2 border">ডায়রি নং</th>
-                  <th rowSpan="2" className="px-4 py-2 border">বিবিধ/অভ্যন্তরীণ দপ্তর</th>
-                  <th rowSpan="2" className="px-4 py-2 border">বিবিধ/বহিস্থ দপ্তর</th>
-                  <th rowSpan="2" className="px-4 py-2 border">সাক্ষর/সিল</th>
-                  <th rowSpan="2" className="px-4 py-2 border">ফাইল</th>
-                  <th rowSpan="2" className="px-4 py-2 border">Action</th>
-                </tr>
-                {/* Sub-Columns */}
-                <tr>
-                  <th className="px-4 py-2 border">1</th>
-                  <th className="px-4 py-2 border">2</th>
-                  <th className="px-4 py-2 border">3</th>
-                  <th className="px-4 py-2 border">4</th>
-                  <th className="px-4 py-2 border">1</th>
-                  <th className="px-4 py-2 border">2</th>
-                  <th className="px-4 py-2 border">3</th>
-                  <th className="px-4 py-2 border">4</th>
+                  <th className="px-4 py-2 border">ক্রমিক</th>
+                  <th className="px-4 py-2 border">বিষয়/বিবরণ</th>
+                  <th className="px-4 py-2 border">উপদেষ্টার দপ্তর</th>
+                  <th className="px-4 py-2 border">সিনিয়র সচিবের দপ্তর</th>
+                  <th className="px-4 py-2 border">অতিঃ সচিব (আইন)অনুবিভাগ</th>
+                  <th className="px-4 py-2 border">যুগ্ন সচিব (আইন)অধিশাখা</th>
+                  <th className="px-4 py-2 border">অতিঃ সচিব (শৃংখলা)অনুবিভাগ</th>
+                  <th className="px-4 py-2 border">যুগ্ন সচিব (শৃংখলা)অধিশাখা</th>
+                  <th className="px-4 py-2 border">আইন শাখাসমূহ</th>
+                  <th className="px-4 py-2 border">শৃংখলা শাখাসমূহ</th>
+                  <th className="px-4 py-2 border">সুপারিশ/মন্তব্য</th>
+                  <th className="px-4 py-2 border">ডায়রি নং</th>
+                  <th className="px-4 py-2 border">বিবিধ/অভ্যন্তরীণ দপ্তর</th>
+                  <th className="px-4 py-2 border">বিবিধ/বহিস্থ দপ্তর</th>
+                  <th className="px-4 py-2 border">সাক্ষর/সিল</th>
+                  <th className="px-4 py-2 border">Action</th>
                 </tr>
               </thead>
               <tbody>
+
                 {filteredData.map((item, index) => (
                   <tr key={item.id}>
-                    {/* Serial Number */}
                     <td className="px-4 py-2 border">{index + 1}</td>
+                    <td className="px-4 py-2 border">{item.bishoy_biboron || "-"}</td>
+                    <td className="px-4 py-2 border">{item.upodeshtar_depto || "-"}</td>
+                    <td className="px-4 py-2 border">{item.senior_secretary_depto || "-"}</td>
+                    <td className="px-4 py-2 border">{item.atik_secretary_law || "-"}</td>
+                    <td className="px-4 py-2 border">{item.anu_vibhag || "-"}</td>
+                    <td className="px-4 py-2 border">{item.atik_secretary_discipline || "-"}</td>
+                    <td className="px-4 py-2 border">{item.anu_vibhag_discipline || "-"}</td>
 
-                    {/* Subject/Description */}
-                    <td className="px-4 py-2 border text-center">{item.bishoy_biboron || "-"}</td>
+                    {/* <td className="px-4 py-2 border">{item.law_shakha || "-"}</td> */}
+                    <td className="px-4 py-2 border">
+                      {item.law_shakha && item.law_shakha_number
+                        ? `${item.law_shakha} (${convertToBengaliNumber(item.law_shakha_number)})`
+                        : item.law_shakha || item.law_shakha_number || "-"
+                      }
+                    </td>
 
-                    {/* Various Departments */}
-                    <td className="px-4 py-2 border text-center">{item.upodeshtar_depto || "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.senior_secretary_depto || "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.atik_secretary_law || "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.anu_vibhag || "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.atik_secretary_discipline || "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.anu_vibhag_discipline || "-"}</td>
-
-                    {/* Law Shakha Numbers */}
-                    <td className="px-4 py-2 border text-center">{item.law_shakha_number === 1 ? item.law_shakha : "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.law_shakha_number === 2 ? item.law_shakha : "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.law_shakha_number === 3 ? item.law_shakha : "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.law_shakha_number === 4 ? item.law_shakha : "-"}</td>
-
-                    {/* Discipline Shakha Numbers */}
-                    <td className="px-4 py-2 border text-center">{item.discipline_shakha_number === 1 ? item.discipline_shakha : "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.discipline_shakha_number === 2 ? item.discipline_shakha : "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.discipline_shakha_number === 3 ? item.discipline_shakha : "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.discipline_shakha_number === 4 ? item.discipline_shakha : "-"}</td>
-
-                    {/* Comments/Recommendations */}
-                    <td className="px-4 py-2 border text-center">{item.suparish_comment || "-"}</td>
-
-                    {/* Diary Number */}
-                    <td className="px-4 py-2 border text-center">{convertToBengaliNumber(item.diary_no) || "-"}</td>
-
-                    {/* Internal and External Departments */}
-                    <td className="px-4 py-2 border text-center">{item.internal_depto || "-"}</td>
-                    <td className="px-4 py-2 border text-center">{item.external_depto || "-"}</td>
-
-                    {/* File upload */}
-                    <td className="px-4 py-2 border text-center">{item.signature_seal || "-"}</td>
-
-                    {/* Signature/Seal */}
-                    <td className="px-4 py-2 border text-center">{item.signature_seal || "-"}</td>
-
-                    
-                    {/* Action */}
-                    <td className="px-4 py-2 border text-center">
-                      <button
-                        onClick={() => handleEdit(item.id)}
-                        className="text-yellow-500 hover:text-yellow-700"
-                      >
-                        Edit
-                      </button>
+                    <td className="px-4 py-2 border">
+                      {item.discipline_shakha && item.discipline_shakha_number
+                        ? `${item.discipline_shakha} (${convertToBengaliNumber(item.discipline_shakha_number)})`
+                        : item.discipline_shakha || item.discipline_shakha_number || "-"
+                      }
+                    </td>
+                    <td className="px-4 py-2 border">{item.suparish_comment || "-"}</td>
+                    <td className="px-4 py-2 border">{item.diary_no || "-"}</td>
+                    <td className="px-4 py-2 border">{item.internal_depto || "-"}</td>
+                    <td className="px-4 py-2 border">{item.external_depto || "-"}</td>
+                    <td className="px-4 py-2 border">{item.signature_seal || "-"}</td>
+                    <td className="px-4 py-2 border lg:flex gap-5">
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="text-red-500 hover:text-red-700"
+                        className="btn bg-red-500 text-white hover:text-red-500"
                       >
                         Delete
+                      </button>
+                      <button
+                        onClick={() => handleEdit(item.id)}
+                        className="btn bg-green-700 text-white hover:text-green-700"
+                      >
+                        Edit
                       </button>
                     </td>
                   </tr>
@@ -459,7 +404,6 @@ const handleInputChange = (e, field) => {
               </tbody>
             </table>
           </div>
-
 
 
         </div>

@@ -11,6 +11,7 @@ import ComposePage from "./Components/compose/compose";
 
 import AuthProvider from "./providers/AuthProvider";
 import ForgotPassword from "./ForgotPassword/ForgotPassword";
+import EditPage from "./Components/EditPage/EditPage";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
       {
         path: "/compose",
         element: <ComposePage />
+      },
+      {
+        path: "/edit/:id",
+        element: <EditPage />
       },
     ],
   },
