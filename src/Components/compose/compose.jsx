@@ -161,8 +161,6 @@ const ComposePage = () => {
         </div>
 
 
-
-
         <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
           <div style={{ flex: 1 }}>
             <label>অতিঃ সচিব (আইন) অনুবিভাগ:</label>
