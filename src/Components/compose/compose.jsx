@@ -1,7 +1,6 @@
-// ComposePage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../firebase/supabaseClient'; // Import Supabase client
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { useNavigate, useParams } from 'react-router-dom'; // Import useNavigate and useParams for navigation and edit handling
 
 const ComposePage = () => {
   const [formData, setFormData] = useState({
@@ -18,11 +17,8 @@ const ComposePage = () => {
     adhiShakhaDiscipline: '',
     lawShakha: '',
     disciplineShakha: '',
-
-    lawShakhaNumber: '', // New key for dropdown
-    disciplineShakhaNumber: '', // New key for dropdown
-
-
+    lawShakhaNumber: '', 
+    disciplineShakhaNumber: '', 
     suparishComment: '',
     diaryNo: '',
     bibid: '',
@@ -31,9 +27,28 @@ const ComposePage = () => {
     signatureSeal: ''
   });
 
-  const [showModal, setShowModal] = useState(false); // For showing/hiding the modal
-  const [modalMessage, setModalMessage] = useState(""); // To store the message for the modal
-  const navigate = useNavigate(); // Initialize navigate function from react-router-dom
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const navigate = useNavigate();
+  const { id } = useParams(); // Get the ID from the URL (for edit mode)
+
+  // Fetch data if editing an existing entry
+  useEffect(() => {
+    const fetchData = async () => {
+      if (id) {
+        const { data, error } = await supabase
+          .from('compose')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (data) {
+          setFormData(data); // Pre-populate form with the fetched data
+        }
+      }
+    };
+    fetchData();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,67 +58,98 @@ const ComposePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Log the form data for debugging
-    console.log("Form Data:", formData);
-
     try {
-      // Save data to Supabase
-      const { data, error } = await supabase
-        .from('compose') // Replace with your Supabase table name
-        .insert([
-          {
+      let result;
+      if (id) {
+        // Update existing record
+        const { data, error } = await supabase
+          .from('compose')
+          .update({
             bishoy_biboron: formData.bishoyBiboron,
             upodeshtar_depto: formData.upodeshtarDepto,
             senior_secretary_depto: formData.seniorSecretaryDepto,
-
             atik_secretary_law: formData.atikSecretaryLaw,
             anu_vibhag: formData.additonalSecretaryLaw,
-
-
-
-
             atik_secretary_discipline: formData.atikSecretaryDiscipline,
             anu_vibhag_discipline: formData.anuVibhagDiscipline,
-            // jn_secretary_discipline: formData.jnSecretaryDiscipline,
-            // adhi_shakha_discipline: formData.adhiShakhaDiscipline,
-
-
             law_shakha: formData.lawShakha,
             discipline_shakha: formData.disciplineShakha,
-
-
             law_shakha_number: formData.lawShakhaNumber ? parseInt(formData.lawShakhaNumber, 10) : null,
             discipline_shakha_number: formData.disciplineShakhaNumber ? parseInt(formData.disciplineShakhaNumber, 10) : null,
-
-
             suparish_comment: formData.suparishComment,
             diary_no: formData.diaryNo,
             internal_depto: formData.internalDepto,
             external_depto: formData.externalDepto,
             signature_seal: formData.signatureSeal
-          }
-        ]);
+          })
+          .eq('id', id);
 
-      if (error) {
-        // Log detailed error response for debugging
-        console.error('Error saving data to Supabase:', error);
-        setModalMessage(`Failed to submit form. Error: ${error.message}`);
+        if (error) {
+          setModalMessage(`Error: ${error.message}`);
+        } else {
+          setModalMessage('Record updated successfully!');
+        }
       } else {
-        console.log('Form submitted and data saved:', data);
-        setModalMessage('Form submitted successfully!');
+        // Create new record
+        const { data, error } = await supabase
+          .from('compose')
+          .insert([
+            {
+              bishoy_biboron: formData.bishoyBiboron,
+              upodeshtar_depto: formData.upodeshtarDepto,
+              senior_secretary_depto: formData.seniorSecretaryDepto,
+              atik_secretary_law: formData.atikSecretaryLaw,
+              anu_vibhag: formData.additonalSecretaryLaw,
+              atik_secretary_discipline: formData.atikSecretaryDiscipline,
+              anu_vibhag_discipline: formData.anuVibhagDiscipline,
+              law_shakha: formData.lawShakha,
+              discipline_shakha: formData.disciplineShakha,
+              law_shakha_number: formData.lawShakhaNumber ? parseInt(formData.lawShakhaNumber, 10) : null,
+              discipline_shakha_number: formData.disciplineShakhaNumber ? parseInt(formData.disciplineShakhaNumber, 10) : null,
+              suparish_comment: formData.suparishComment,
+              diary_no: formData.diaryNo,
+              internal_depto: formData.internalDepto,
+              external_depto: formData.externalDepto,
+              signature_seal: formData.signatureSeal
+            }
+          ]);
+
+        if (error) {
+          setModalMessage(`Error: ${error.message}`);
+        } else {
+          setModalMessage('Record added successfully!');
+        }
       }
 
-      setShowModal(true); // Show modal on form submit
+      setShowModal(true);
     } catch (err) {
-      console.error("Unexpected error during submission:", err);
       setModalMessage('Failed to submit form. Please try again.');
-      setShowModal(true); // Show modal even in case of unexpected error
+      setShowModal(true);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('compose')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        setModalMessage(`Error: ${error.message}`);
+      } else {
+        setModalMessage('Record deleted successfully!');
+        setShowModal(true);
+      }
+    } catch (err) {
+      setModalMessage('Failed to delete record. Please try again.');
+      setShowModal(true);
     }
   };
 
   const handleModalClose = () => {
-    if (modalMessage === 'Form submitted successfully!') {
-      navigate('/dashboard'); // Redirect to dashboard if success
+    if (modalMessage === 'Record updated successfully!' || modalMessage === 'Record added successfully!') {
+      navigate('/dashboard'); // Redirect to dashboard after success
     }
     setShowModal(false); // Close the modal
   };
@@ -111,13 +157,10 @@ const ComposePage = () => {
   return (
     <div style={{ padding: '20px', backgroundColor: '#f4f4f9' }}>
       <h1 style={{ textAlign: 'center', color: '#333', fontWeight: 'bold', fontSize: '2.5rem' }}>
-        ডায়রি
+        {id ? 'Edit ডায়রি' : 'ডায়রি'}
       </h1>
       <form onSubmit={handleSubmit} style={{ maxWidth: '600px', margin: '0 auto' }}>
-
-
-
-        <div style={{ marginBottom: '10px' }}>
+      <div style={{ marginBottom: '10px' }}>
           <label>বিষয় / বিবরণ:</label>
           <input
             type="text"
@@ -128,11 +171,6 @@ const ComposePage = () => {
             style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
         </div>
-
-
-
-
-
 
         <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
           <div style={{ flex: 1 }}>
@@ -190,16 +228,6 @@ const ComposePage = () => {
         </div>
 
 
-
-
-
-
-
-
-
-
-
-
         <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
           <div style={{ flex: 1 }}>
             <label>অতিঃ সচিব (শৃংখলা) অনুবিভাগ:</label>
@@ -230,16 +258,16 @@ const ComposePage = () => {
 
         <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
           {/* <div style={{ flex: 1 }}>
-    <label>আইন শাখা:</label>
-    <input
-      type="text"
-      name="lawShakha"
-      value={formData.lawShakha}
-      onChange={handleChange}
-      
-      style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-    />
-  </div> */}
+<label>আইন শাখা:</label>
+<input
+type="text"
+name="lawShakha"
+value={formData.lawShakha}
+onChange={handleChange}
+
+style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+/>
+</div> */}
 
           <div style={{ flex: 1 }}>
             <label>আইন শাখা:</label>
@@ -317,16 +345,16 @@ const ComposePage = () => {
         </div>
 
         {/* <div style={{ marginBottom: '10px' }}>
-          <label>বিবিধ:</label>
-          <input
-            type="text"
-            name="bibid"
-            value={formData.bibid}
-            onChange={handleChange}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div> */}
+  <label>বিবিধ:</label>
+  <input
+    type="text"
+    name="bibid"
+    value={formData.bibid}
+    onChange={handleChange}
+    required
+    style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+  />
+</div> */}
 
         <div style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}>
           <div style={{ flex: 1 }}>
@@ -365,7 +393,7 @@ const ComposePage = () => {
             style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
         </div>
-
+        
         <button
           type="submit"
           style={{
@@ -378,12 +406,30 @@ const ComposePage = () => {
             width: '100%'
           }}
         >
-          Submit
+          {id ? 'Update' : 'Submit'}
         </button>
 
+        {id && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#f44336',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              width: '100%',
+              marginTop: '10px'
+            }}
+          >
+            Delete
+          </button>
+        )}
       </form>
-      {/* Modal */}
 
+      {/* Modal for success or error */}
       {showModal && (
         <div style={{
           position: 'fixed',
@@ -420,8 +466,6 @@ const ComposePage = () => {
           </div>
         </div>
       )}
-
-
     </div>
   );
 };

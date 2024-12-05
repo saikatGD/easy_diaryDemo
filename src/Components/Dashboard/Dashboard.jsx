@@ -30,7 +30,24 @@ const Dashboard = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
+  const handleEdit = (item) => {
+    console.log("Navigating to compose with item:", item);
+    navigate("/compose", { state: { formData: item } });
+  };
+  const handleSave = async () => {
+    if (isEditing) {
+      await updateItem(currentItem.id, { name: newItem });
+      setIsEditing(false);
+      setCurrentItem(null);
+    } else {
+      await createItem({ name: newItem });
+    }
+    fetchItems();
+    setNewItem('');
+  };
+      
   // Fetch data from Supabase compose table
   useEffect(() => {
     if (user) {
@@ -208,11 +225,10 @@ const Dashboard = () => {
       <div className="grow ml-16 md:ml-64 lg:h-screen bg-gray-200 text-gray-900">
         {/* User info display */}
         <div className="flex items-center justify-between gap-4 p-3 border-b">
-          {/* Left part for any other elements you might have, or just leave it empty */}
-
           <div className="flex-1 text-right">
             <h2 className="font-semibold text-lg">{userData.name}</h2>
             <p className="text-gray-500">{userData.email}</p>
+            <button onClick={handleLogOut} className="btn bg-green-700 text-white hover:text-green-700">Log out</button>
           </div>
         </div>
 
@@ -307,7 +323,7 @@ const Dashboard = () => {
             {/* Download PDF Button */}
             <button
               onClick={handleDownloadPDF}
-              className="btn btn-primary ml-4"
+              className="btn bg-green-700 text-white hover:text-green-700 ml-4"
             >
               Download PDF
             </button>
@@ -338,37 +354,6 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* {data.map((item, index) => (
-          <tr key={item.id}>
-          <td className="px-4 py-2 border">{index + 1}</td>
-  <td className="px-4 py-2 border text-center">{item.bishoy_biboron || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.upodeshtar_depto || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.senior_secretary_depto || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.atik_secretary_law || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.anu_vibhag || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.atik_secretary_discipline || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.anu_vibhag_discipline || "-"}</td>
-
-  <td className="px-4 py-2 border text-center">{item.law_shakha || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.discipline_shakha || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.suparish_comment || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.diary_no || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.internal_depto || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.external_depto || "-"}</td>
-  <td className="px-4 py-2 border text-center">{item.signature_seal || "-"}</td>
-
-            <td className="px-4 py-2 border">
-              <button
-                onClick={() => handleDelete(item.id)}
-                className="text-red-500 hover:text-red-700"
-                aria-label="Delete"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        ))} */}
-
 
                 {filteredData.map((item, index) => (
                   <tr key={item.id}>
@@ -400,12 +385,18 @@ const Dashboard = () => {
                     <td className="px-4 py-2 border">{item.internal_depto || "-"}</td>
                     <td className="px-4 py-2 border">{item.external_depto || "-"}</td>
                     <td className="px-4 py-2 border">{item.signature_seal || "-"}</td>
-                    <td className="px-4 py-2 border">
+                    <td className="px-4 py-2 border lg:flex gap-5">
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="text-red-500 hover:text-red-700"
+                        className="btn bg-red-500 text-white hover:text-red-500"
                       >
                         Delete
+                      </button>
+                      <button
+                        onClick={() => handleEdit(item.id)}
+                        className="btn bg-green-700 text-white hover:text-green-700"
+                      >
+                        Edit
                       </button>
                     </td>
                   </tr>

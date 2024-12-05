@@ -9,8 +9,10 @@ import Registration from "./Components/Registration/Registration";
 import Dashboard from "./Components/Dashboard/Dashboard";
 import ComposePage from "./Components/compose/compose";
 
+
 import AuthProvider from "./providers/AuthProvider";
 import ForgotPassword from "./ForgotPassword/ForgotPassword";
+import Composes from "../src/Components/compose/compose";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -37,6 +39,10 @@ const router = createBrowserRouter([
         path: "/compose",
         element: <ComposePage />
       },
+      {
+        path: "/edit",
+        element: <Composes />
+      },
     ],
   },
 ]);
@@ -45,6 +51,7 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
       <RouterProvider router={router} />
+      
     </AuthProvider>
   </StrictMode>
 );
